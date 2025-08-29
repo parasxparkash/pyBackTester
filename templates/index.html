@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PyBacktester - Backtesting Framework</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 0.375rem;
+            --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 0.5rem 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .results-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .form-control:focus {
+            outline: 0;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 0;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: var(--border-radius);
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .btn-primary {
+            color: #fff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        
+        .btn-primary:disabled {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            cursor: not-allowed;
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .results-header {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+        
+        .results-subtitle {
+            color: var(--secondary-color);
+            margin: 0.5rem 0 0 0;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: var(--light-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+            margin: 0.25rem 0 0 0;
+        }
+        
+        .chart-container {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #f5c6cb;
+            margin-bottom: 1rem;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #c3e6cb;
+            margin-bottom: 1rem;
+        }
+        
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+            margin-top: 0.25rem;
+        }
+        
+        .strategy-info {
+            background: var(--light-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+        
+        .strategy-info h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--dark-color);
+        }
+        
+        .strategy-info p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PyBacktester</h1>
+            <p>Professional Backtesting Framework for Algorithmic Trading</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="form-section">
+                <h2>Backtest Configuration</h2>
+                <form id="backtestForm">
+                    <div class="form-group">
+                        <label for="symbols">Stock Symbols</label>
+                        <input type="text" id="symbols" name="symbols" class="form-control" 
+                               value="AAPL" placeholder="e.g., AAPL, GOOGL, MSFT">
+                        <div class="help-text">Enter stock symbols separated by commas</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="strategy">Trading Strategy</label>
+                        <select id="strategy" name="strategy" class="form-control">
+                            <option value="buy_and_hold">Buy and Hold</option>
+                            <option value="moving_average">Moving Average Crossover</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="start_date">Start Date</label>
+                        <input type="date" id="start_date" name="start_date" class="form-control" 
+                               value="2020-01-01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="initial_capital">Initial Capital ($)</label>
+                        <input type="number" id="initial_capital" name="initial_capital" class="form-control" 
+                               value="10000" min="1000" step="1000">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block" id="runBacktest">
+                        Run Backtest
+                    </button>
+                </form>
+                
+                <div class="strategy-info" id="strategyInfo">
+                    <h4>Buy and Hold Strategy</h4>
+                    <p>This strategy buys the specified stocks at the beginning of the backtest period and holds them until the end. It's a simple benchmark strategy that represents a passive investment approach.</p>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Running backtest... This may take a few moments.</p>
+                </div>
+                
+                <div class="results" id="results">
+                    <div class="results-header">
+                        <h3 class="results-title" id="resultsTitle">Backtest Results</h3>
+                        <p class="results-subtitle" id="resultsSubtitle">Strategy performance analysis</p>
+                    </div>
+                    
+                    <div class="metrics-grid" id="metricsGrid">
+                        <!-- Metrics will be populated here -->
+                    </div>
+                    
+                    <div class="chart-container" id="chartContainer">
+                        <!-- Chart will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="errorMessage" class="error" style="display: none;">
+                    <!-- Error messages will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Strategy information
+        const strategyInfo = {
+            'buy_and_hold': {
+                title: 'Buy and Hold Strategy',
+                description: 'This strategy buys the specified stocks at the beginning of the backtest period and holds them until the end. It\'s a simple benchmark strategy that represents a passive investment approach.'
+            },
+            'moving_average': {
+                title: 'Moving Average Crossover Strategy',
+                description: 'This strategy uses two moving averages (short and long term) to generate buy and sell signals. When the short-term moving average crosses above the long-term moving average, it generates a buy signal. When it crosses below, it generates a sell signal.'
+            }
+        };
+        
+        // Update strategy info when strategy changes
+        document.getElementById('strategy').addEventListener('change', function() {
+            const selectedStrategy = this.value;
+            const infoDiv = document.getElementById('strategyInfo');
+            const info = strategyInfo[selectedStrategy];
+            
+            infoDiv.innerHTML = `
+                <h4>${info.title}</h4>
+                <p>${info.description}</p>
+            `;
+        });
+        
+        // Handle form submission
+        document.getElementById('backtestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('runBacktest').disabled = true;
+            
+            try {
+                const response = await fetch('/run_backtest', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayResults(result);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                showError('An error occurred while running the backtest: ' + error.message);
+            } finally {
+                // Hide loading state
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('runBacktest').disabled = false;
+            }
+        });
+        
+        function displayResults(result) {
+            const { results, additional_info, plot } = result;
+            
+            // Update results header
+            document.getElementById('resultsTitle').textContent = `${additional_info.strategy_name} Results`;
+            document.getElementById('resultsSubtitle').textContent = 
+                `${additional_info.data_info.symbols.join(', ')} | ${additional_info.data_info.start_date} | $${additional_info.data_info.initial_capital.toLocaleString()}`;
+            
+            // Display metrics
+            const metricsGrid = document.getElementById('metricsGrid');
+            const keyMetrics = [
+                { key: 'Total Return', label: 'Total Return', suffix: '%' },
+                { key: 'Sharpe Ratio', label: 'Sharpe Ratio', suffix: '' },
+                { key: 'Max Drawdown', label: 'Max Drawdown', suffix: '%' },
+                { key: 'CAGR', label: 'CAGR', suffix: '%' },
+                { key: 'Volatility', label: 'Volatility', suffix: '%' },
+                { key: 'Win Ratio', label: 'Win Ratio', suffix: '%' }
+            ];
+            
+            metricsGrid.innerHTML = keyMetrics.map(metric => {
+                const value = results[metric.key];
+                if (value !== undefined) {
+                    return `
+                        <div class="metric-card">
+                            <div class="metric-value">${value.toFixed(2)}${metric.suffix}</div>
+                            <div class="metric-label">${metric.label}</div>
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('');
+            
+            // Display chart
+            const chartContainer = document.getElementById('chartContainer');
+            chartContainer.innerHTML = `
+                <h4>Equity Curve & Drawdown Analysis</h4>
+                <img src="data:image/png;base64,${plot}" alt="Equity Curve">
+            `;
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
